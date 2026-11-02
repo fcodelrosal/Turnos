@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gestión de Turnos - Cuidado de Papá</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    /* Distinct & Harmonious Color Codes */
+    .bg-francis { background-color: #3b82f6 !important; color: #ffffff !important; border-color: #2563eb !important; }
+    .bg-rafa { background-color: #10b981 !important; color: #ffffff !important; border-color: #059669 !important; }
+    .bg-mdolores { background-color: #ec4899 !important; color: #ffffff !important; border-color: #db2777 !important; }
+    .bg-inma { background-color: #8b5cf6 !important; color: #ffffff !important; border-color: #7c3aed !important; }
+    .bg-todos { background-color: #f59e0b !important; color: #ffffff !important; border-color: #d97706 !important; }
+    .bg-blanco { background-color: #ffffff !important; color: #64748b !important; border-color: #cbd5e1 !important; }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { background-color: white !important; }
+      .print-container { height: auto !important; max-height: none !important; overflow: visible !important; }
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col min-h-screen bg-slate-50 text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header & Legend Bar -->
+  <header class="bg-white border-b border-slate-200 shadow-sm shrink-0 no-print">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        
+        <!-- App Title & Online Status Indicator -->
+        <div class="flex items-center justify-between sm:justify-start space-x-3">
+          <div class="flex items-center space-x-2">
+            <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-sm">
+              <i class="fa-solid fa-heart text-xs"></i>
+            </div>
+            <div>
+              <h1 class="text-sm sm:text-base font-bold text-slate-900 leading-none">Turnos Cuidado de Papá</h1>
+              <p class="text-[10px] text-slate-500 mt-0.5">Francis, Rafa, M. Dolores e Inma</p>
+            </div>
+          </div>
+          <!-- Cloud Sync Status Indicator -->
+          <span id="syncStatus" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-700 border border-emerald-200">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span> Conectado
+          </span>
+        </div>
+
+        <!-- Interactive Legend / Header Codes -->
+        <div class="flex flex-wrap gap-1 items-center text-[11px]">
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded font-semibold bg-blue-500 text-white">
+            <strong class="mr-1 bg-white/20 px-1 rounded text-[9px]">F</strong> Francis
+          </span>
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded font-semibold bg-emerald-500 text-white">
+            <strong class="mr-1 bg-white/20 px-1 rounded text-[9px]">R</strong> Rafa
+          </span>
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded font-semibold bg-pink-500 text-white">
+            <strong class="mr-1 bg-white/20 px-1 rounded text-[9px]">MD</strong> M. Dolores
+          </span>
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded font-semibold bg-purple-500 text-white">
+            <strong class="mr-1 bg-white/20 px-1 rounded text-[9px]">I</strong> Inma
+          </span>
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded font-semibold bg-amber-500 text-white">
+            <strong class="mr-1 bg-white/20 px-1 rounded text-[9px]">T</strong> Todos
+          </span>
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded font-semibold bg-white text-slate-600 border border-slate-300">
+            En blanco
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Toolbar Control Row -->
+  <div class="bg-white border-b border-slate-200 py-2 px-3 sm:px-6 shrink-0 no-print">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      
+      <!-- Date Navigator -->
+      <div class="flex items-center space-x-1.5">
+        <button id="prevBtn" class="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 active:bg-slate-200 transition text-slate-600">
+          <i class="fa-solid fa-chevron-left text-xs"></i>
+        </button>
+        <span id="currentPeriodLabel" class="text-xs sm:text-sm font-bold text-slate-800 capitalize min-w-[120px] text-center"></span>
+        <button id="nextBtn" class="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 active:bg-slate-200 transition text-slate-600">
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+        </button>
+        <button id="todayBtn" class="px-2 py-1 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition">
+          Hoy
+        </button>
+      </div>
+
+      <!-- View & Action Control Buttons -->
+      <div class="flex items-center space-x-1.5">
+        <!-- View Toggle Buttons -->
+        <div class="inline-flex p-0.5 bg-slate-100 rounded-lg border border-slate-200 text-xs">
+          <button id="viewMonthBtn" class="px-2.5 py-1 font-semibold rounded-md transition shadow-sm bg-white text-slate-800">
+            Mes
+          </button>
+          <button id="viewWeekBtn" class="px-2.5 py-1 font-semibold rounded-md transition text-slate-600 hover:text-slate-900">
+            Semana
+          </button>
+        </div>
+
+        <button id="autoFillBtn" class="px-2.5 py-1 text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg hover:bg-indigo-100 active:bg-indigo-200 transition flex items-center gap-1" title="Sábados -> Francis, Domingos -> Reparto 4 hermanos">
+          <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
+          <span class="hidden sm:inline">Auto-asignar</span>
+        </button>
+
+        <button id="clearMonthBtn" class="px-2 py-1 text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200 rounded-lg hover:bg-rose-50 hover:text-rose-600 transition" title="Borrar datos de este período">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+
+        <button onclick="window.print()" class="px-2 py-1 text-xs font-medium bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition">
+          <i class="fa-solid fa-print"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Main View Container -->
+  <main class="flex-grow flex flex-col p-2 sm:p-4 max-w-7xl w-full mx-auto overflow-y-auto print-container">
+    <div id="calendarContainer" class="flex-grow flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm p-2 min-h-[380px]">
+      <!-- Dynamically Injected Content -->
+    </div>
+  </main>
+
+  <!-- Modal Selector Dialog for Day Assignment -->
+  <div id="dayModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-xs w-full p-4">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100 mb-3">
+        <div>
+          <h3 id="modalDateTitle" class="font-bold text-slate-900 text-sm"></h3>
+          <p id="modalDateSubtitle" class="text-xs text-slate-500 capitalize"></p>
+        </div>
+        <button id="closeModalBtn" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <!-- Quick Action Selection Buttons -->
+      <div class="space-y-1.5" id="modalOptionsContainer">
+        <!-- Rendered dynamically -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Pure JavaScript with Multi-Provider Cloud Sync -->
+  <script>
+    // App State Variables
+    var turnosData = {};
+    var currentDate = new Date();
+    var currentView = 'month'; // 'month' or 'week'
+    var selectedDateKey = null;
+    var isSaving = false;
+
+    // LocalStorage Key
+    var STORAGE_KEY = 'turnos_papa_hermanos_v8';
+
+    // Cloud Data Sync Endpoint (Firebase Realtime REST endpoint)
+    var CLOUD_API_URL = 'https://turnos-papa-default-rtdb.europe-west1.firebasedatabase.app/turnos.json';
+
+    // 1. Load Local Storage on startup
+    function loadFromLocalStorage() {
+      try {
+        var saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          turnosData = JSON.parse(saved);
+        }
+      } catch(e) {
+        console.error("Error cargando de almacenamiento local:", e);
+      }
+    }
+
+    // 2. Fetch Remote Data from Cloud
+    function fetchRemoteTurnos() {
+      if (isSaving) return; // Prevent overwriting while user is actively editing
+
+      fetch(CLOUD_API_URL, { cache: 'no-store' })
+        .then(function(res) {
+          if (!res.ok) throw new Error("HTTP error " + res.status);
+          return res.json();
+        })
+        .then(function(remoteData) {
+          if (remoteData && typeof remoteData === 'object') {
+            // Check if data is different before re-rendering
+            var remoteString = JSON.stringify(remoteData);
+            var localString = JSON.stringify(turnosData);
+
+            if (remoteString !== localString) {
+              turnosData = remoteData;
+              localStorage.setItem(STORAGE_KEY, remoteString);
+              render();
+            }
+          }
+          updateStatusBadge('online');
+        })
+        .catch(function(err) {
+          // Fallback to secondary JSON storage if primary endpoint is unavailable
+          fetch('https://api.npoint.io/414b2d45c556f8f5e1f0', { cache: 'no-store' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+                turnosData = data;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                render();
+              }
+            })
+            .catch(function(){})
+            .finally(function() {
+              updateStatusBadge('online');
+            });
+        });
+    }
+
+    // 3. Push Local Data to Cloud
+    function pushRemoteTurnos() {
+      isSaving = true;
+      updateStatusBadge('saving');
+
+      var payload = JSON.stringify(turnosData);
+      localStorage.setItem(STORAGE_KEY, payload);
+
+      // Save simultaneously to Realtime Cloud Database
+      Promise.all([
+        fetch(CLOUD_API_URL, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload
+        }),
+        fetch('https://api.npoint.io/414b2d45c556f8f5e1f0', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload
+        })
+      ]).finally(function() {
+        isSaving = false;
+        updateStatusBadge('online');
+      });
+    }
+
+    // Helper: Update UI Badge Status
+    function updateStatusBadge(state) {
+      var syncStatus = document.getElementById('syncStatus');
+      if (!syncStatus) return;
+
+      if (state === 'saving') {
+        syncStatus.className = "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700 border border-amber-200";
+        syncStatus.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1 animate-ping"></span> Sincronizando...';
+      } else {
+        syncStatus.className = "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-700 border border-emerald-200";
+        syncStatus.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span> Sincronizado';
+      }
+    }
+
+    // DOM References
+    var calendarContainer = document.getElementById('calendarContainer');
+    var currentPeriodLabel = document.getElementById('currentPeriodLabel');
+    var prevBtn = document.getElementById('prevBtn');
+    var nextBtn = document.getElementById('nextBtn');
+    var todayBtn = document.getElementById('todayBtn');
+    var viewMonthBtn = document.getElementById('viewMonthBtn');
+    var viewWeekBtn = document.getElementById('viewWeekBtn');
+    var autoFillBtn = document.getElementById('autoFillBtn');
+    var clearMonthBtn = document.getElementById('clearMonthBtn');
+
+    // Modal References
+    var dayModal = document.getElementById('dayModal');
+    var modalDateTitle = document.getElementById('modalDateTitle');
+    var modalDateSubtitle = document.getElementById('modalDateSubtitle');
+    var modalOptionsContainer = document.getElementById('modalOptionsContainer');
+    var closeModalBtn = document.getElementById('closeModalBtn');
+
+    // Date Utilities
+    function formatDateKey(date) {
+      var y = date.getFullYear();
+      var m = String(date.getMonth() + 1);
+      if (m.length < 2) m = '0' + m;
+      var d = String(date.getDate());
+      if (d.length < 2) d = '0' + d;
+      return y + '-' + m + '-' + d;
+    }
+
+    function getInitialCode(name) {
+      if (!name) return "";
+      if (name === "Francis") return "F";
+      if (name === "Rafa") return "R";
+      if (name === "M. Dolores") return "MD";
+      if (name === "Inma") return "I";
+      if (name === "Todos") return "T";
+      return "";
+    }
+
+    function getColorStyle(name) {
+      switch(name) {
+        case 'Francis': return 'bg-francis';
+        case 'Rafa': return 'bg-rafa';
+        case 'M. Dolores': return 'bg-mdolores';
+        case 'Inma': return 'bg-inma';
+        case 'Todos': return 'bg-todos';
+        default: return 'bg-blanco';
+      }
+    }
+
+    // Modal Interactions
+    window.openModalForDate = function(dateKey) {
+      selectedDateKey = dateKey;
+      var parts = dateKey.split('-');
+      var dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+      
+      var dayOfWeek = dateObj.getDay();
+      var dayName = dateObj.toLocaleDateString('es-ES', { weekday: 'long' });
+
+      modalDateTitle.textContent = dateObj.getDate() + ' de ' + dateObj.toLocaleDateString('es-ES', { month: 'long' });
+      modalDateSubtitle.textContent = dayName;
+
+      // Rule: Francis last in list for Mon-Fri
+      var sortedOptions = [];
+      if (dayOfWeek === 6 || dayOfWeek === 0) {
+        sortedOptions = ["Francis", "Rafa", "M. Dolores", "Inma", "Todos", ""];
+      } else {
+        sortedOptions = ["Rafa", "M. Dolores", "Inma", "Francis", "Todos", ""];
+      }
+
+      var currentValue = turnosData[dateKey] || "";
+
+      var optionsHTML = "";
+      for (var i = 0; i < sortedOptions.length; i++) {
+        var opt = sortedOptions[i];
+        var isSelected = currentValue === opt;
+        var code = getInitialCode(opt);
+        var styleClass = getColorStyle(opt);
+        var displayName = opt === "" ? "En blanco" : opt;
+
+        optionsHTML += `
+          <button onclick="selectOptionForDate('${opt}')" class="w-full flex items-center justify-between p-2.5 rounded-xl border transition-all ${isSelected ? 'ring-2 ring-indigo-600 ring-offset-1 font-bold' : 'hover:opacity-90'} ${styleClass}">
+            <div class="flex items-center space-x-2.5">
+              <span class="w-6 h-6 rounded bg-black/15 flex items-center justify-center font-extrabold text-xs shrink-0">${code || '-'}</span>
+              <span class="text-xs font-semibold">${displayName}</span>
+            </div>
+            ${isSelected ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+          </button>
+        `;
+      }
+
+      modalOptionsContainer.innerHTML = optionsHTML;
+      dayModal.classList.remove('hidden');
+    };
+
+    window.selectOptionForDate = function(val) {
+      if (selectedDateKey) {
+        if (val === "") {
+          delete turnosData[selectedDateKey];
+        } else {
+          turnosData[selectedDateKey] = val;
+        }
+        render();
+        pushRemoteTurnos();
+      }
+      closeModal();
+    };
+
+    function closeModal() {
+      dayModal.classList.add('hidden');
+      selectedDateKey = null;
+    }
+
+    closeModalBtn.addEventListener('click', closeModal);
+    dayModal.addEventListener('click', function(e) {
+      if (e.target === dayModal) closeModal();
+    });
+
+    // Default Rules Auto Assignment
+    function autoAssignDefaults() {
+      var year = currentDate.getFullYear();
+      var month = currentDate.getMonth();
+      var daysInMonth = new Date(year, month + 1, 0).getDate();
+      var sundayCount = 0;
+
+      for (var day = 1; day <= daysInMonth; day++) {
+        var date = new Date(year, month, day);
+        var dateKey = formatDateKey(date);
+        var dayOfWeek = date.getDay();
+
+        if (!turnosData[dateKey]) {
+          if (dayOfWeek === 6) {
+            turnosData[dateKey] = "Francis";
+          } else if (dayOfWeek === 0) {
+            var siblings = ["Francis", "Rafa", "M. Dolores", "Inma"];
+            turnosData[dateKey] = siblings[sundayCount % siblings.length];
+            sundayCount++;
+          }
+        } else if (dayOfWeek === 0 && ["Francis", "Rafa", "M. Dolores", "Inma"].indexOf(turnosData[dateKey]) !== -1) {
+          sundayCount++;
+        }
+      }
+      render();
+      pushRemoteTurnos();
+    }
+
+    // Navigation Buttons
+    prevBtn.addEventListener('click', function() {
+      if (currentView === 'month') {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+      } else {
+        currentDate.setDate(currentDate.getDate() - 7);
+      }
+      render();
+    });
+
+    nextBtn.addEventListener('click', function() {
+      if (currentView === 'month') {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      } else {
+        currentDate.setDate(currentDate.getDate() + 7);
+      }
+      render();
+    });
+
+    todayBtn.addEventListener('click', function() {
+      currentDate = new Date();
+      render();
+    });
+
+    viewMonthBtn.addEventListener('click', function() {
+      currentView = 'month';
+      viewMonthBtn.className = "px-2.5 py-1 font-semibold rounded-md transition shadow-sm bg-white text-slate-800";
+      viewWeekBtn.className = "px-2.5 py-1 font-semibold rounded-md transition text-slate-600 hover:text-slate-900";
+      render();
+    });
+
+    viewWeekBtn.addEventListener('click', function() {
+      currentView = 'week';
+      viewWeekBtn.className = "px-2.5 py-1 font-semibold rounded-md transition shadow-sm bg-white text-slate-800";
+      viewMonthBtn.className = "px-2.5 py-1 font-semibold rounded-md transition text-slate-600 hover:text-slate-900";
+      render();
+    });
+
+    autoFillBtn.addEventListener('click', autoAssignDefaults);
+
+    clearMonthBtn.addEventListener('click', function() {
+      var year = currentDate.getFullYear();
+      var month = currentDate.getMonth();
+      var daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (var day = 1; day <= daysInMonth; day++) {
+        var date = new Date(year, month, day);
+        delete turnosData[formatDateKey(date)];
+      }
+      render();
+      pushRemoteTurnos();
+    });
+
+    // Main Render Function
+    function render() {
+      if (currentView === 'month') {
+        renderMonthGrid();
+      } else {
+        renderWeekGrid();
+      }
+    }
+
+    // 1. MONTH VIEW (Only Initial Sigla, blank days are clean)
+    function renderMonthGrid() {
+      var year = currentDate.getFullYear();
+      var month = currentDate.getMonth();
+
+      var monthName = currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+      currentPeriodLabel.textContent = monthName;
+
+      var firstDay = new Date(year, month, 1);
+      var daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      var startingDay = firstDay.getDay() - 1;
+      if (startingDay === -1) startingDay = 6;
+
+      var today = new Date();
+
+      var html = `
+        <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-slate-500 uppercase py-1 shrink-0">
+          <div>Lun</div>
+          <div>Mar</div>
+          <div>Mié</div>
+          <div>Jue</div>
+          <div>Vie</div>
+          <div class="text-blue-600">Sáb</div>
+          <div class="text-indigo-600">Dom</div>
+        </div>
+        <div class="flex-grow grid grid-cols-7 grid-rows-5 gap-1 sm:gap-1.5 h-full min-h-[340px]">
+      `;
+
+      for (var i = 0; i < startingDay; i++) {
+        html += `<div class="bg-slate-50/50 rounded-lg border border-dashed border-slate-200"></div>`;
+      }
+
+      for (var day = 1; day <= daysInMonth; day++) {
+        var date = new Date(year, month, day);
+        var dateKey = formatDateKey(date);
+        var selectedValue = turnosData[dateKey] || "";
+        var code = getInitialCode(selectedValue);
+        var colorClass = getColorStyle(selectedValue);
+
+        var isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
+
+        html += `
+          <button onclick="openModalForDate('${dateKey}')" class="flex flex-col items-center justify-between p-1 rounded-lg sm:rounded-xl border transition-all duration-100 ${colorClass} ${isToday ? 'ring-2 ring-indigo-600 ring-offset-1 font-bold' : ''}">
+            <div class="flex items-center justify-between w-full px-0.5">
+              <span class="text-[10px] sm:text-xs font-bold opacity-80">${day}</span>
+            </div>
+            <div class="my-auto flex items-center justify-center">
+              ${selectedValue ? `<span class="text-xs sm:text-sm font-black uppercase tracking-wider">${code}</span>` : ''}
+            </div>
+            <div></div>
+          </button>
+        `;
+      }
+
+      html += `</div>`;
+      calendarContainer.innerHTML = html;
+    }
+
+    // 2. WEEK VIEW (All 7 Days visible with Full Names)
+    function renderWeekGrid() {
+      var date = new Date(currentDate);
+      var day = date.getDay();
+      var diff = date.getDate() - day + (day === 0 ? -6 : 1);
+      var monday = new Date(date.setDate(diff));
+
+      var sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+
+      var startStr = monday.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+      var endStr = sunday.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+      currentPeriodLabel.textContent = startStr + ' - ' + endStr;
+
+      var html = `<div class="flex-grow grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-2 h-full min-h-[350px]">`;
+
+      var today = new Date();
+
+      for (var i = 0; i < 7; i++) {
+        var d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+
+        var dateKey = formatDateKey(d);
+        var selectedValue = turnosData[dateKey] || "";
+        var colorClass = getColorStyle(selectedValue);
+
+        var dayName = d.toLocaleDateString('es-ES', { weekday: 'long' });
+        var dayNum = d.getDate();
+        var monthNameShort = d.toLocaleDateString('es-ES', { month: 'short' });
+
+        var isToday = today.toDateString() === d.toDateString();
+
+        html += `
+          <button onclick="openModalForDate('${dateKey}')" class="flex flex-col justify-between p-2.5 rounded-xl border transition-all shadow-sm ${colorClass} ${isToday ? 'ring-2 ring-indigo-600 ring-offset-1' : ''}">
+            <div class="flex items-center justify-between w-full border-b border-black/10 pb-1">
+              <span class="text-xs font-bold capitalize">${dayName}</span>
+              <span class="text-xs font-extrabold opacity-80">${dayNum} ${monthNameShort}</span>
+            </div>
+
+            <div class="my-auto text-center py-2 sm:py-4">
+              ${selectedValue 
+                ? `<span class="text-sm sm:text-base font-extrabold block leading-snug">${selectedValue}</span>` 
+                : `<span class="text-xs opacity-40 italic block">Sin asignar</span>`}
+            </div>
+
+            <div class="text-[9px] opacity-60 text-center font-medium">
+              Toca para cambiar
+            </div>
+          </button>
+        `;
+      }
+
+      html += `</div>`;
+      calendarContainer.innerHTML = html;
+    }
+
+    // Startup & Sync Polling loop (every 3 seconds)
+    document.addEventListener('DOMContentLoaded', function() {
+      loadFromLocalStorage();
+      render();
+      fetchRemoteTurnos();
+      setInterval(fetchRemoteTurnos, 3000);
+    });
+  </script>
+</body>
+</html>
